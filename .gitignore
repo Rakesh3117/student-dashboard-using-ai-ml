@@ -9,7 +9,6 @@ lerna-debug.log*
 
 node_modules
 dist
-venv
 dist-ssr
 *.local
 
@@ -23,7 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-/project/node_modules
-/project venv
-
