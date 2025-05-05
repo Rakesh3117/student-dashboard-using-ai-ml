@@ -26,86 +26,101 @@ data_loaded = False
 model_trained = False
 
 def generate_random_data(num_students=40):
-    """Generate random student data for testing."""
+    """Generate or load student data depending on the data_loaded flag."""
     global students_data, class_data, predictions, data_loaded, model_trained
-    
-    subjects = ['Math', 'Science', 'English', 'History', 'Arts']
-    names = [
-        "Emma Johnson", "Liam Smith", "Olivia Williams", "Noah Brown", "Ava Jones",
-        "Elijah Davis", "Sophia Miller", "Lucas Wilson", "Isabella Moore", "Mason Taylor",
-        "Mia Anderson", "Logan Thomas", "Charlotte Jackson", "Ethan White", "Amelia Harris",
-        "Jacob Martin", "Harper Thompson", "Carter Garcia", "Evelyn Martinez", "James Robinson",
-        "Abigail Clark", "Benjamin Rodriguez", "Emily Lewis", "Alexander Lee", "Elizabeth Walker",
-        "Michael Hall", "Avery Allen", "Daniel Young", "Sofia Hernandez", "Matthew King",
-        "Scarlett Wright", "Henry Lopez", "Camila Hill", "Owen Scott", "Victoria Green",
-        "Sebastian Adams", "Madison Baker", "Jack Gonzalez", "Aria Nelson", "Wyatt Carter"
-    ]
-    
-    random.shuffle(names)
-    names = names[:num_students]
-    
-    students = []
-    
-    for i in range(num_students):
-        # Generate baseline score for student (determines overall ability)
-        baseline = random.randint(60, 95)
+
+    if data_loaded:
+        # Assume 'df' is already loaded as a pandas DataFrame
+        import pandas as pd
+
+        subjects = df['subjects'].dropna().unique().tolist()
+        subject_columns = [col for col in df.columns if col in subjects]
+
+        students = []
+        for idx, row in df.iterrows():
+            scores = [row.get(subject, 0) for subject in subject_columns]
+            overall_score = sum(scores) / len(subjects)
+            attendance = max(70, min(100, overall_score + random.randint(-10, 10)))
+
+            trend = random.choices(['up', 'stable', 'down'], weights=[0.4, 0.4, 0.2])[0]
+            time_periods = ['Term 1', 'Term 2', 'Term 3', 'Term 4']
+            if trend == 'up':
+                trend_data = [max(0, min(100, overall_score - 10 + i * 3 + random.randint(-3, 3))) for i in range(len(time_periods))]
+            elif trend == 'down':
+                trend_data = [max(0, min(100, overall_score + 5 - i * 2 + random.randint(-3, 3))) for i in range(len(time_periods))]
+            else:
+                trend_data = [max(0, min(100, overall_score + random.randint(-5, 5))) for i in range(len(time_periods))]
+
+            student = {
+                "id": idx + 1,
+                "name": row.get('names', f'Student {idx+1}'),
+                "subjects": subjects,
+                "scores": scores,
+                "overall_score": overall_score,
+                "attendance": attendance,
+                "trend": trend,
+                "time_periods": time_periods,
+                "trend_data": trend_data,
+                "percentile": f"{random.randint(1, 100)}",
+                "class_averages": [random.randint(65, 85) for _ in subjects],
+                "subject_percentiles": [random.randint(50, 99) for _ in subjects],
+            }
+
+            students.append(student)
+
+    else:
+        # --- YOUR EXISTING DUMMY DATA GENERATION CODE BELOW ---
+        subjects = ['Math', 'Science', 'English', 'History', 'Arts']
+        names = [
+            "Emma Johnson", "Liam Smith", "Olivia Williams", "Noah Brown", "Ava Jones",
+            "Elijah Davis", "Sophia Miller", "Lucas Wilson", "Isabella Moore", "Mason Taylor",
+            "Mia Anderson", "Logan Thomas", "Charlotte Jackson", "Ethan White", "Amelia Harris",
+            "Jacob Martin", "Harper Thompson", "Carter Garcia", "Evelyn Martinez", "James Robinson",
+            "Abigail Clark", "Benjamin Rodriguez", "Emily Lewis", "Alexander Lee", "Elizabeth Walker",
+            "Michael Hall", "Avery Allen", "Daniel Young", "Sofia Hernandez", "Matthew King",
+            "Scarlett Wright", "Henry Lopez", "Camila Hill", "Owen Scott", "Victoria Green",
+            "Sebastian Adams", "Madison Baker", "Jack Gonzalez", "Aria Nelson", "Wyatt Carter"
+        ]
+        random.shuffle(names)
+        names = names[:num_students]
         
-        # Generate scores for each subject with some variation
-        scores = [max(0, min(100, baseline + random.randint(-15, 15))) for _ in subjects]
-        
-        # Calculate overall score
-        overall_score = sum(scores) / len(scores)
-        
-        # Generate attendance (correlated with overall score)
-        attendance = max(70, min(100, overall_score + random.randint(-10, 10)))
-        
-        # Determine trend
-        trend_options = ['up', 'stable', 'down']
-        trend_weights = [0.4, 0.4, 0.2]
-        trend = random.choices(trend_options, trend_weights)[0]
-        
-        # Create time-series data for trends
-        time_periods = ['Term 1', 'Term 2', 'Term 3', 'Term 4']
-        if trend == 'up':
-            trend_data = [max(0, min(100, overall_score - 10 + i * 3 + random.randint(-3, 3))) for i in range(len(time_periods))]
-        elif trend == 'down':
-            trend_data = [max(0, min(100, overall_score + 5 - i * 2 + random.randint(-3, 3))) for i in range(len(time_periods))]
-        else:
-            trend_data = [max(0, min(100, overall_score + random.randint(-5, 5))) for i in range(len(time_periods))]
-        
-        # Calculate percentile based on overall score
-        percentile = f"{random.randint(1, 100)}"
-        
-        student = {
-            "id": i + 1,
-            "name": names[i],
-            "subjects": subjects,
-            "scores": scores,
-            "overall_score": overall_score,
-            "attendance": attendance,
-            "trend": trend,
-            "time_periods": time_periods,
-            "trend_data": trend_data,
-            "percentile": percentile,
-            "class_averages": [random.randint(65, 85) for _ in subjects],
-            "subject_percentiles": [random.randint(50, 99) for _ in subjects],
-        }
-        
-        students.append(student)
-    
-    # Sort students by overall score for rankings
+        students = []
+        for i in range(num_students):
+            baseline = random.randint(60, 95)
+            scores = [max(0, min(100, baseline + random.randint(-15, 15))) for _ in subjects]
+            overall_score = sum(scores) / len(subjects)
+            attendance = max(70, min(100, overall_score + random.randint(-10, 10)))
+            trend = random.choices(['up', 'stable', 'down'], weights=[0.4, 0.4, 0.2])[0]
+            time_periods = ['Term 1', 'Term 2', 'Term 3', 'Term 4']
+            if trend == 'up':
+                trend_data = [max(0, min(100, overall_score - 10 + i * 3 + random.randint(-3, 3))) for i in range(len(time_periods))]
+            elif trend == 'down':
+                trend_data = [max(0, min(100, overall_score + 5 - i * 2 + random.randint(-3, 3))) for i in range(len(time_periods))]
+            else:
+                trend_data = [max(0, min(100, overall_score + random.randint(-5, 5))) for i in range(len(time_periods))]
+            student = {
+                "id": i + 1,
+                "name": names[i],
+                "subjects": subjects,
+                "scores": scores,
+                "overall_score": overall_score,
+                "attendance": attendance,
+                "trend": trend,
+                "time_periods": time_periods,
+                "trend_data": trend_data,
+                "percentile": f"{random.randint(1, 100)}",
+                "class_averages": [random.randint(65, 85) for _ in subjects],
+                "subject_percentiles": [random.randint(50, 99) for _ in subjects],
+            }
+            students.append(student)
+
+    # Sort and create class data
     students.sort(key=lambda x: x["overall_score"], reverse=True)
-    
-    # Generate class data
     averages = [sum(student["scores"][i] for student in students) / len(students) for i in range(len(subjects))]
-    
-    # Grade distribution
     grade_ranges = [(90, 100), (80, 89), (70, 79), (60, 69), (0, 59)]
     grade_distribution = [sum(1 for s in students if grade_range[0] <= s["overall_score"] <= grade_range[1]) for grade_range in grade_ranges]
-    
-    # Calculate passing rate
     passing_count = sum(1 for s in students if s["overall_score"] >= 60)
-    
+
     class_data = {
         "totalStudents": len(students),
         "overallAverage": sum(s["overall_score"] for s in students) / len(students),
@@ -123,15 +138,10 @@ def generate_random_data(num_students=40):
         "performanceIndex": random.uniform(3.0, 4.0),
         "performanceLevel": random.choice(["Below Average", "Average", "Above Average", "Excellent"]),
     }
-    
-    # Generate predictions
+
     generate_predictions(students)
-    
-    # Update global data
     students_data = students
-    data_loaded = True
     model_trained = True
-    
     return True
 
 def generate_predictions(students):
@@ -266,7 +276,7 @@ def train_model(data):
 
 def process_file(file):
     """Process uploaded file (CSV or Excel) and extract student data."""
-    global students_data, class_data, data_loaded
+    global students_data, class_data, data_loaded,df 
     
     try:
         # Determine file type and read
@@ -283,16 +293,17 @@ def process_file(file):
             return False, "The uploaded file is empty."
         
         # Validate required columns
-        required_columns = ['name', 'scores', 'attendance']
+        required_columns = ['name', 'attendance']
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
             return False, f"Missing required columns: {', '.join(missing_columns)}"
+        else:
+            data_loaded = True
         
         # Process the dataframe into our data structure
         try:
             success = generate_random_data(num_students=len(df))
             if success:
-                data_loaded = True
                 return True, "File processed successfully."
             else:
                 return False, "Error processing file data."
