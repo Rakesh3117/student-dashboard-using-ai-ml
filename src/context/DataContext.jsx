@@ -107,9 +107,10 @@ export const DataProvider = ({ children }) => {
     }
   }
 
-  const getStudentById = (id) => {
-    return students.find(student => student.id === parseInt(id))
-  }
+ const getStudentById = (id) => {
+  if (!Array.isArray(students)) return null;
+  return students.find(student => student?.id === parseInt(id));
+};
 
   const getPredictionForStudent = (id) => {
     return predictions.find(prediction => prediction.student_id === parseInt(id))

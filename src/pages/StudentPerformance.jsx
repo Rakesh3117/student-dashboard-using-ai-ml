@@ -8,14 +8,16 @@ function StudentPerformance() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { getStudentById, getPredictionForStudent, students, loading, dataLoaded } = useData()
-  const [student, setStudent] = useState(null)
+  const [student, setStudent] = useState([])
   const [prediction, setPrediction] = useState(null)
+  
   
   useEffect(() => {
     if (dataLoaded && id) {
       const studentData = getStudentById(id)
       if (studentData) {
-        setStudent(studentData)
+        setStudent(Array.isArray(data) ? data : []);
+
         
         // Get prediction if available
         const predictionData = getPredictionForStudent(id)
@@ -23,7 +25,7 @@ function StudentPerformance() {
       } else {
         // If student not found, redirect to the first student or dashboard
         if (students.length > 0) {
-          navigate(`/student/${students[0].id}`)
+          navigate(`/student/${student[0]?.id}`)
         } else {
           navigate('/')
         }
@@ -111,9 +113,11 @@ function StudentPerformance() {
           >
             <FiChevronLeft className="h-6 w-6" />
           </button>
-          <span className="mx-2 text-sm text-gray-500">
-            {students.findIndex(s => s.id === parseInt(id)) + 1} of {students.length}
-          </span>
+         {Array.isArray(students) && (
+  <span className="mx-2 text-sm text-gray-500">
+    {students.findIndex(s => s.id === parseInt(id)) + 1} of {students.length}
+  </span>
+)}
           <button
             onClick={() => navigateToStudent('next')}
             className="p-1 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100"

@@ -126,7 +126,7 @@ function Predictions() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {students.slice(0, 10).map((student) => {
+                  {Array.isArray(students) && students.slice(0, 10).map((student) => {
                     const prediction = predictions.find(p => p.student_id === student.id)
                     const currentScore = student.overall_score || 0
                     const predictedScore = prediction?.predicted_score || 0

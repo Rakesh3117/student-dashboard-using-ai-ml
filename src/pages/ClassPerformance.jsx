@@ -118,7 +118,8 @@ function ClassPerformance() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {students.slice(0, 10).map((student, index) => (
+                  {Array.isArray(students) &&
+  students.slice(0, 10).map((student, index) => (
                     <tr key={student.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {index + 1}
